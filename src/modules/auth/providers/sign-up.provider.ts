@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { SignUpDto } from '../dto/sign-up.dto';
+import { HashingProvider } from './hashing.provider';
 
 @Injectable()
 export class SignUpProvider {
-  constructor() {}
+  constructor(private readonly hashingProvider: HashingProvider) {}
 
-  signUp(signUpDto: SignUpDto) {
-    return signUpDto;
+  async signUp(signUpDto: SignUpDto) {
+    return {
+      ...signUpDto,
+      password: await this.hashingProvider.hash(signUpDto.password),
+    };
   }
 }
