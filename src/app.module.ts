@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DbType } from './common/enum/db-type.enum';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
 import envValidation from './config/env.validation';
@@ -23,14 +24,16 @@ import { UsersModule } from './modules/user/users.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('dbConfig.host'),
-        port: configService.get('dbConfig.port'),
-        username: configService.get('dbConfig.username'),
-        password: configService.get('dbConfig.password'),
-        database: configService.get('dbConfig.name'),
-        synchronize: configService.get('dbConfig.synchronize'),
-        autoLoadEntities: configService.get('dbConfig.autoLoadEntities'),
+        type: configService.get<DbType>('dbConfig.type'),
+        host: configService.get<string>('dbConfig.host'),
+        port: configService.get<number>('dbConfig.port'),
+        username: configService.get<string>('dbConfig.username'),
+        password: configService.get<string>('dbConfig.password'),
+        database: configService.get<string>('dbConfig.name'),
+        synchronize: configService.get<boolean>('dbConfig.synchronize'),
+        autoLoadEntities: configService.get<boolean>(
+          'dbConfig.autoLoadEntities',
+        ),
       }),
     }),
     AuthModule,
