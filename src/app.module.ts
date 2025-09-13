@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -11,6 +12,7 @@ import envValidation from './config/env.validation';
 import jwtConfig from './config/jwt.config';
 import socialConfig from './config/social.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { TokenGuard } from './modules/auth/guards/token.guard';
 import { UsersModule } from './modules/user/users.module';
 
@@ -44,6 +46,13 @@ import { UsersModule } from './modules/user/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TokenGuard],
+  providers: [
+    AppService,
+    TokenGuard,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}
