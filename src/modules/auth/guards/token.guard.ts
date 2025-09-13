@@ -15,7 +15,7 @@ import {
 import jwtConfig from 'src/config/jwt.config';
 
 @Injectable()
-export class TokenGuardGuard implements CanActivate {
+export class TokenGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
