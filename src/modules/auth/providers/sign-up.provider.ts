@@ -12,18 +12,26 @@ export class SignUpProvider {
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
-    const isUserExists = await this.userService.getUserByEmail(signUpDto.email);
-    if (isUserExists) {
-      throw new ConflictException('User already exists');
+    try {
+      const isUserExists = await this.userService.getUserByEmail(
+        signUpDto.email,
+      );
+      if (isUserExists) {
+        throw new ConflictException('User already exists');
+      }
+      const hashedPassword = await this.hashingProvider.hash(
+        signUpDto.password,
+      );
+      const user = await this.userService.createUser({
+        ...signUpDto,
+        password: hashedPassword,
+      });
+      return {
+        data: !!user,
+        message: responseMessage.user.signedUp,
+      };
+    } catch (error) {
+      throw new RequestTimeoutException(error);
     }
-    const hashedPassword = await this.hashingProvider.hash(signUpDto.password);
-    const user = await this.userService.createUser({
-      ...signUpDto,
-      password: hashedPassword,
-    });
-    return {
-      data: !!user,
-      message: responseMessage.user.signedUp,
-    };
   }
 }
