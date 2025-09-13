@@ -9,7 +9,7 @@ export class UserService {
     private readonly getUserByEmailProvider: GetUserByEmailProvider,
   ) {}
 
-  getUserById(id: string) {
+  getUserById(id: number) {
     return this.getUserByIdProvider.getUserById(id);
   }
 

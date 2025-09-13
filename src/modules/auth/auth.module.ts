@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UsersModule } from '../user/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './providers/auth.service';
 import { BcryptProvider } from './providers/bcrypt.provider';
@@ -19,5 +20,6 @@ import { SocialProvider } from './providers/social.provider';
       useClass: BcryptProvider,
     },
   ],
+  imports: [UsersModule],
 })
 export class AuthModule {}

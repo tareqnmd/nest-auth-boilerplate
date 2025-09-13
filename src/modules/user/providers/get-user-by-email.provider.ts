@@ -1,10 +1,22 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserEntity } from '../user.entity';
 
 @Injectable()
 export class GetUserByEmailProvider {
-  constructor() {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
 
-  getUserByEmail(email: string) {
-    return `User ${email}`;
+  async getUserByEmail(email: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      console.log(user);
+      return user;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
