@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { UserRole } from 'src/modules/user/enum/user-role.enum';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { UserService } from 'src/modules/user/providers/user.service';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { HashingProvider } from './hashing.provider';
@@ -13,12 +12,15 @@ export class SignUpProvider {
 
   async signUp(signUpDto: SignUpDto) {
     const isUserExists = await this.userService.getUserByEmail(signUpDto.email);
-    console.log(isUserExists);
-    const user = {
+    if (isUserExists) {
+      throw new ConflictException('User already exists');
+    }
+    const hashedPassword = await this.hashingProvider.hash(signUpDto.password);
+    const user = await this.userService.createUser({
       ...signUpDto,
-      password: await this.hashingProvider.hash(signUpDto.password),
-      role: UserRole.USER,
-    };
+      password: hashedPassword,
+    });
+    console.log(user);
     return user;
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../user.entity';
@@ -13,10 +13,9 @@ export class GetUserByEmailProvider {
   async getUserByEmail(email: string) {
     try {
       const user = await this.userRepository.findOne({ where: { email } });
-      console.log(user);
       return user;
     } catch (error) {
-      console.log(error);
+      throw new RequestTimeoutException(error);
     }
   }
 }
