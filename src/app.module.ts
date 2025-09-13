@@ -11,6 +11,7 @@ import envValidation from './config/env.validation';
 import jwtConfig from './config/jwt.config';
 import socialConfig from './config/social.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { TokenGuard } from './modules/auth/guards/token.guard';
 import { UsersModule } from './modules/user/users.module';
 
 @Module({
@@ -43,6 +44,6 @@ import { UsersModule } from './modules/user/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TokenGuard],
 })
 export class AppModule {}

@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { UserRole } from 'src/modules/user/enum/user-role.enum';
 import { REQUEST_USER_KEY } from '../constants';
 
