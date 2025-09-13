@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import responseMessage from 'src/common/messages/response.message';
 import { UserService } from 'src/modules/user/providers/user.service';
 import { SignUpDto } from '../dto/sign-up.dto';
