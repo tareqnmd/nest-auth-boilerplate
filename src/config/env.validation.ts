@@ -1,10 +1,11 @@
 import * as Joi from 'joi';
+import { DbType } from 'src/common/enum/db-type.enum';
 
 export default Joi.object({
   PORT: Joi.number().required(),
   NODE_ENV: Joi.string().required(),
 
-  DB_TYPE: Joi.string().required(),
+  DB_TYPE: Joi.string().valid(DbType.POSTGRES).required(),
   DB_HOST: Joi.string().required(),
   DB_PORT: Joi.number().required(),
   DB_USERNAME: Joi.string().required(),
