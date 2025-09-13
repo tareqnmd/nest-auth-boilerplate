@@ -1,4 +1,12 @@
 import { UserRole } from 'src/modules/user/enum/user-role.enum';
+import { REQUEST_USER_KEY } from '../constants';
+
+export interface ITokenUser {
+  id: number;
+  email: string;
+  exp: number;
+  iat: number;
+}
 
 export interface ITokenPayload {
   id: number;
@@ -19,4 +27,8 @@ export interface IUser {
   role: UserRole;
   image: string;
   token: IUserToken;
+}
+
+export interface RequestWithUser extends Request {
+  [REQUEST_USER_KEY]: ITokenUser;
 }
