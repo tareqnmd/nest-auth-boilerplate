@@ -5,7 +5,7 @@ export interface ITokenUser {
   iat: number;
 }
 
-export interface ITokenNPayload {
+export interface ITokenPayload {
   id: number;
   email: string;
 }

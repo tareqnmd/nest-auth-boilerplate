@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ITokenNPayload } from 'src/common/interfaces/token-user.interface';
+import { ITokenPayload } from 'src/common/interfaces/token-user.interface';
 import jwtConfig from 'src/config/jwt.config';
 
 @Injectable()
@@ -28,7 +28,7 @@ export class AuthTokensProvider {
     );
   }
 
-  public async generateTokens(user: ITokenNPayload) {
+  public async authTokens(user: ITokenPayload) {
     const [accessToken, refreshToken] = await Promise.all([
       this.generateToken(user.id, this.jwtConfiguration.accessTokenTTL, {
         email: user.email,
