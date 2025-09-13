@@ -1,4 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import responseMessage from 'src/common/messages/response.message';
 import { UserService } from 'src/modules/user/providers/user.service';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { HashingProvider } from './hashing.provider';
@@ -20,7 +21,9 @@ export class SignUpProvider {
       ...signUpDto,
       password: hashedPassword,
     });
-    console.log(user);
-    return user;
+    return {
+      data: !!user,
+      message: responseMessage.user.signedUp,
+    };
   }
 }

@@ -31,7 +31,7 @@ export class UserEntity extends DefaultEntity {
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 255,
     nullable: true,
   })
   @Exclude()
