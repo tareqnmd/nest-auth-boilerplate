@@ -30,8 +30,17 @@ export class SignInProvider {
 
     return {
       data: {
-        ...userExists,
-        ...tokens,
+        id: userExists.id,
+        email: userExists.email,
+        name: userExists.firstName + ' ' + userExists.lastName,
+        role: userExists.role,
+        image: userExists.image,
+        token: {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          accessTokenExpiresIn: 1000,
+          refreshTokenExpiresIn: 1000,
+        },
       },
       message: responseMessage.user.signedIn,
     };

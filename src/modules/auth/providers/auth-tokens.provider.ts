@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ITokenPayload } from 'src/common/interfaces/token-user.interface';
 import jwtConfig from 'src/config/jwt.config';
