@@ -16,7 +16,7 @@ export class AuthTokensProvider {
     expiresIn: number,
     payload?: T,
   ) {
-    return await this.jwtService.signAsync(
+    const token = await this.jwtService.signAsync(
       {
         id: userId,
         ...payload,
@@ -26,6 +26,8 @@ export class AuthTokensProvider {
         secret: this.jwtConfiguration.secret,
       },
     );
+    const expiry = new Date(Date.now() + expiresIn);
+    return { token, expiry };
   }
 
   public async authTokens(user: ITokenPayload) {
@@ -36,9 +38,6 @@ export class AuthTokensProvider {
       this.generateToken(user.id, this.jwtConfiguration.refreshTokenTTL),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
   }
 }
