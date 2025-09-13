@@ -7,6 +7,7 @@ import { HashingProvider } from './providers/hashing.provider';
 import { SignInProvider } from './providers/sign-in.provider';
 import { SignUpProvider } from './providers/sign-up.provider';
 import { SocialProvider } from './providers/social.provider';
+import { AuthTokensProvider } from './providers/auth-tokens.provider';
 
 @Module({
   controllers: [AuthController],
@@ -19,6 +20,7 @@ import { SocialProvider } from './providers/social.provider';
       provide: HashingProvider,
       useClass: BcryptProvider,
     },
+    AuthTokensProvider,
   ],
   imports: [UsersModule],
 })
