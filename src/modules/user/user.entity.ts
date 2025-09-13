@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { DefaultEntity } from 'src/common/entities/default.entity';
-import { Column } from 'typeorm/browser';
+import { Column } from 'typeorm';
 import { UserRole } from './enum/user-role.enum';
 
 export class UserEntity extends DefaultEntity {
