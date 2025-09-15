@@ -2,6 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { GITHUB_API_URL } from 'src/common/constants';
 import socialConfig from 'src/config/social.config';
+import { IGitHubUser } from '../interfaces/github-user.interface';
 
 @Injectable()
 export class GithubAuthProvider {
@@ -10,7 +11,7 @@ export class GithubAuthProvider {
     private readonly socialConfiguration: ConfigType<typeof socialConfig>,
   ) {}
 
-  async verifyGithubToken(token: string) {
+  async verifyGithubToken(token: string): Promise<IGitHubUser> {
     if (!token) throw new UnauthorizedException();
     try {
       const response = await fetch(GITHUB_API_URL, {
@@ -20,7 +21,7 @@ export class GithubAuthProvider {
         },
       });
       if (response.status !== 200) throw new UnauthorizedException();
-      const data = await response.json();
+      const data = (await response.json()) as IGitHubUser;
       return data;
     } catch {
       throw new UnauthorizedException();
@@ -30,12 +31,15 @@ export class GithubAuthProvider {
   async githubAuth(token: string) {
     try {
       const data = await this.verifyGithubToken(token);
-      console.log(data);
       if (!data) throw new UnauthorizedException();
-      const [firstName, lastName] = data.name.split(' ');
+
+      const nameParts = data.name ? data.name.split(' ') : ['', ''];
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
       return {
-        firstName: firstName ?? '',
-        lastName: lastName ?? '',
+        firstName,
+        lastName,
         email: data.email,
         image: data.avatar_url,
         githubId: data.id,
