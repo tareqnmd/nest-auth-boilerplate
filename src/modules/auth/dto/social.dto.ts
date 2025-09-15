@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { SocialType } from '../enum/social-type.enum';
 
 export class SocialDto {
@@ -6,7 +6,7 @@ export class SocialDto {
   @IsNotEmpty()
   token: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsEnum(SocialType)
   type: SocialType;
 }

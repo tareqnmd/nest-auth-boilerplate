@@ -11,6 +11,8 @@ import { HashingProvider } from './providers/hashing.provider';
 import { SignInProvider } from './providers/sign-in.provider';
 import { SignUpProvider } from './providers/sign-up.provider';
 import { SocialProvider } from './providers/social.provider';
+import { GoogleAuthProvider } from './providers/google-auth.provider';
+import { GithubAuthProvider } from './providers/github-auth.provider';
 
 @Module({
   controllers: [AuthController],
@@ -24,6 +26,8 @@ import { SocialProvider } from './providers/social.provider';
       useClass: BcryptProvider,
     },
     AuthTokensProvider,
+    GoogleAuthProvider,
+    GithubAuthProvider,
   ],
   imports: [
     UsersModule,
