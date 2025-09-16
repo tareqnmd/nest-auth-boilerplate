@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { IUser } from 'src/common/interfaces/user.interface';
 import responseMessage from 'src/common/messages/response.message';
 import { UserService } from 'src/modules/user/providers/user.service';
+import { UserEntity } from 'src/modules/user/user.entity';
 import { SignUpDtoWithSocial } from '../dto/sign-up-social.dto';
 import { SocialDto } from '../dto/social.dto';
 import { SocialType } from '../enum/social-type.enum';
@@ -18,6 +19,29 @@ export class SocialProvider {
     private readonly googleAuthProvider: GoogleAuthProvider,
     private readonly githubAuthProvider: GithubAuthProvider,
   ) {}
+
+  async userData(user: UserEntity) {
+    const tokens = await this.authTokensProvider.authTokens({
+      id: user.id,
+      email: user.email,
+    });
+    return {
+      data: {
+        id: user.id,
+        email: user.email,
+        name: user.firstName + ' ' + user.lastName,
+        role: user.role,
+        image: user.image,
+        token: {
+          accessToken: tokens.accessToken.token,
+          refreshToken: tokens.refreshToken.token,
+          accessTokenExpiresIn: tokens.accessToken.expiry,
+          refreshTokenExpiresIn: tokens.refreshToken.expiry,
+        },
+      } as IUser,
+      message: responseMessage.user.signedIn,
+    };
+  }
 
   async social(socialDto: SocialDto) {
     const type = socialDto.type;
@@ -46,26 +70,8 @@ export class SocialProvider {
             githubId: socialResponse.githubId,
           });
         }
-        const tokens = await this.authTokensProvider.authTokens({
-          id: user.id,
-          email: user.email,
-        });
-        return {
-          data: {
-            id: user.id,
-            email: user.email,
-            name: user.firstName + ' ' + user.lastName,
-            role: user.role,
-            image: user.image,
-            token: {
-              accessToken: tokens.accessToken.token,
-              refreshToken: tokens.refreshToken.token,
-              accessTokenExpiresIn: tokens.accessToken.expiry,
-              refreshTokenExpiresIn: tokens.refreshToken.expiry,
-            },
-          } as IUser,
-          message: responseMessage.user.signedIn,
-        };
+
+        return await this.userData(user);
       } else {
         const newUser: SignUpDtoWithSocial = {
           firstName: socialResponse.firstName,
@@ -82,29 +88,8 @@ export class SocialProvider {
             }),
         };
         const user = await this.userService.createUser(newUser);
-        const tokens = await this.authTokensProvider.authTokens({
-          id: user.id,
-          email: user.email,
-        });
-
-        return {
-          data: {
-            id: user.id,
-            email: user.email,
-            name: user.firstName + ' ' + user.lastName,
-            role: user.role,
-            image: user.image,
-            token: {
-              accessToken: tokens.accessToken.token,
-              refreshToken: tokens.refreshToken.token,
-              accessTokenExpiresIn: tokens.accessToken.expiry,
-              refreshTokenExpiresIn: tokens.refreshToken.expiry,
-            },
-          } as IUser,
-          message: responseMessage.user.signedIn,
-        };
+        return await this.userData(user);
       }
-      return socialResponse;
     } else {
       throw new BadRequestException('Authentication failed');
     }
