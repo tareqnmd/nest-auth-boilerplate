@@ -7,6 +7,7 @@ import {
 import type { ConfigType } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import socialConfig from 'src/config/social.config';
+import { ISocialResponse } from '../interfaces/social-response.interface';
 
 @Injectable()
 export class GoogleAuthProvider implements OnModuleInit {
@@ -47,7 +48,7 @@ export class GoogleAuthProvider implements OnModuleInit {
         email: data.email,
         image: data.picture,
         googleId: data.sub,
-      };
+      } as ISocialResponse;
     } catch {
       throw new UnauthorizedException();
     }

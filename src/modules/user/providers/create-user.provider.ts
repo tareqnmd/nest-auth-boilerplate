@@ -1,5 +1,6 @@
 import { Injectable, RequestTimeoutException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SignUpDtoWithSocial } from 'src/modules/auth/dto/sign-up-social.dto';
 import { SignUpDto } from 'src/modules/auth/dto/sign-up.dto';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../user.entity';
@@ -11,7 +12,7 @@ export class CreateUserProvider {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async createUser(signUpDto: SignUpDto) {
+  async createUser(signUpDto: SignUpDto | SignUpDtoWithSocial) {
     try {
       const newUser = await this.userRepository.save(signUpDto);
       return newUser;

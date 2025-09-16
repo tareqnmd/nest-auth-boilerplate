@@ -6,6 +6,7 @@ import { UserService } from './providers/user.service';
 import { UserEntity } from './user.entity';
 import { UserController } from './users.controller';
 import { CreateUserProvider } from './providers/create-user.provider';
+import { UpdateUserProvider } from './providers/update-user.provider';
 
 @Module({
   controllers: [UserController],
@@ -14,6 +15,7 @@ import { CreateUserProvider } from './providers/create-user.provider';
     GetUserByEmailProvider,
     GetUserByIdProvider,
     CreateUserProvider,
+    UpdateUserProvider,
   ],
   exports: [UserService],
   imports: [TypeOrmModule.forFeature([UserEntity])],

@@ -3,6 +3,7 @@ import type { ConfigType } from '@nestjs/config';
 import { GITHUB_API_URL } from 'src/common/constants';
 import socialConfig from 'src/config/social.config';
 import { IGitHubUser } from '../interfaces/github-user.interface';
+import { ISocialResponse } from '../interfaces/social-response.interface';
 
 @Injectable()
 export class GithubAuthProvider {
@@ -42,8 +43,8 @@ export class GithubAuthProvider {
         lastName,
         email: data.email,
         image: data.avatar_url,
-        githubId: data.id,
-      };
+        githubId: data.id.toString(),
+      } as ISocialResponse;
     } catch {
       throw new UnauthorizedException();
     }

@@ -7,12 +7,12 @@ import { AuthController } from './auth.controller';
 import { AuthTokensProvider } from './providers/auth-tokens.provider';
 import { AuthService } from './providers/auth.service';
 import { BcryptProvider } from './providers/bcrypt.provider';
+import { GithubAuthProvider } from './providers/github-auth.provider';
+import { GoogleAuthProvider } from './providers/google-auth.provider';
 import { HashingProvider } from './providers/hashing.provider';
 import { SignInProvider } from './providers/sign-in.provider';
 import { SignUpProvider } from './providers/sign-up.provider';
 import { SocialProvider } from './providers/social.provider';
-import { GoogleAuthProvider } from './providers/google-auth.provider';
-import { GithubAuthProvider } from './providers/github-auth.provider';
 
 @Module({
   controllers: [AuthController],
