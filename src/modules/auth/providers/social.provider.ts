@@ -60,15 +60,25 @@ export class SocialProvider {
       }
       const user = await this.userService.getUserByEmail(socialResponse.email);
       if (user) {
-        if (type === SocialType.GOOGLE && !user.googleId) {
-          await this.userService.updateUser(user.id, {
-            googleId: socialResponse.googleId,
-          });
+        if (type === SocialType.GOOGLE) {
+          if (!user.googleId) {
+            await this.userService.updateUser(user.id, {
+              googleId: socialResponse.googleId,
+            });
+          }
+          if (user.googleId !== socialResponse.googleId) {
+            throw new BadRequestException('Invalid Google ID');
+          }
         }
-        if (type === SocialType.GITHUB && !user.githubId) {
-          await this.userService.updateUser(user.id, {
-            githubId: socialResponse.githubId,
-          });
+        if (type === SocialType.GITHUB) {
+          if (!user.githubId) {
+            await this.userService.updateUser(user.id, {
+              githubId: socialResponse.githubId,
+            });
+          }
+          if (user.githubId !== socialResponse.githubId) {
+            throw new BadRequestException('Invalid GitHub ID');
+          }
         }
 
         return await this.userData(user);
