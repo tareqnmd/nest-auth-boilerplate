@@ -7,12 +7,13 @@ import {
 } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { REQUEST_USER_KEY } from 'src/common/constants';
+import { REQUEST_USER_KEY } from '../../../common/constants';
+import { InvalidTokenException } from '../../../common/exceptions';
 import {
   ITokenUser,
   RequestWithUser,
-} from 'src/common/interfaces/user.interface';
-import jwtConfig from 'src/config/jwt.config';
+} from '../../../common/interfaces/user.interface';
+import jwtConfig from '../../../config/jwt.config';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -25,20 +26,16 @@ export class TokenGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
     const token = request.headers.authorization?.split(' ')[1];
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access token is required');
     }
     try {
       const payload = await this.jwtService.verifyAsync<ITokenUser>(
         token,
         this.jwtConfiguration,
       );
-      const isExpired = Date.now() >= payload?.exp * 1000;
-      if (isExpired) {
-        throw new UnauthorizedException();
-      }
       request[REQUEST_USER_KEY] = payload;
-    } catch (error) {
-      throw new UnauthorizedException(error);
+    } catch {
+      throw new InvalidTokenException();
     }
     return true;
   }

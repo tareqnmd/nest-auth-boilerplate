@@ -1,8 +1,10 @@
+import { UserField } from '../../../common/enum';
+
 export interface ISocialResponse {
-  firstName: string;
-  lastName: string;
-  email: string;
-  image: string;
-  googleId?: string;
-  githubId?: string;
+  [UserField.FIRST_NAME]: string;
+  [UserField.LAST_NAME]: string;
+  [UserField.EMAIL]: string;
+  [UserField.IMAGE]: string;
+  [UserField.GOOGLE_ID]?: string;
+  [UserField.GITHUB_ID]?: string;
 }

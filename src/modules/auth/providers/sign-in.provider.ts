@@ -1,57 +1,95 @@
 import {
+  BadRequestException,
   Injectable,
-  RequestTimeoutException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IUser } from 'src/common/interfaces/user.interface';
-import responseMessage from 'src/common/messages/response.message';
-import { UserService } from 'src/modules/user/providers/user.service';
+import { Types } from 'mongoose';
+import { UserField } from '../../../common/enum';
+import {
+  AccountLockedException,
+  AccountNotActiveException,
+  UserNotVerifiedException,
+} from '../../../common/exceptions';
+import { ErrorHandlerHelper } from '../../../common/helper';
+import { UserResponseHelper } from '../../../common/helper/user-response.helper';
+import responseMessage from '../../../common/messages/response.message';
+import { UserService } from '../../../modules/user/providers/user.service';
+import { HashingProvider } from '../../hashing/providers/hashing.provider';
 import { SignInDto } from '../dto/sign-in.dto';
+import { AccountLockoutProvider } from './account-lockout.provider';
 import { AuthTokensProvider } from './auth-tokens.provider';
-import { HashingProvider } from './hashing.provider';
 
 @Injectable()
 export class SignInProvider {
+  private readonly logger = new Logger(SignInProvider.name);
+
   constructor(
     private readonly authTokensProvider: AuthTokensProvider,
     private readonly hashingProvider: HashingProvider,
     private readonly userService: UserService,
+    private readonly accountLockoutProvider: AccountLockoutProvider,
   ) {}
 
   async signIn(signInDto: SignInDto) {
     try {
-      const userExists = await this.userService.getUserByEmail(signInDto.email);
-      if (!userExists) {
-        throw new UnauthorizedException('Invalid credentials');
+      if (!signInDto[UserField.EMAIL]) {
+        throw new BadRequestException(responseMessage.token.required);
       }
-      const isPasswordValid = await this.hashingProvider.compare(
-        signInDto.password,
-        userExists?.password ?? '',
+      const user = await this.userService.getUserByEmail(
+        signInDto[UserField.EMAIL],
       );
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid credentials');
+
+      if (!user) {
+        throw new UnauthorizedException(
+          responseMessage.auth.invalidCredentials,
+        );
       }
 
-      const tokens = await this.authTokensProvider.authTokens(userExists);
+      if (this.accountLockoutProvider.isAccountLocked(user)) {
+        const remainingMinutes =
+          this.accountLockoutProvider.getRemainingLockoutMinutes(user);
+        throw new AccountLockedException(remainingMinutes);
+      }
 
-      return {
-        data: {
-          id: userExists.id,
-          email: userExists.email,
-          name: userExists.firstName + ' ' + userExists.lastName,
-          role: userExists.role,
-          image: userExists.image,
-          token: {
-            accessToken: tokens.accessToken.token,
-            refreshToken: tokens.refreshToken.token,
-            accessTokenExpiresIn: tokens.accessToken.expiry,
-            refreshTokenExpiresIn: tokens.refreshToken.expiry,
-          },
-        } as IUser,
-        message: responseMessage.user.signedIn,
-      };
+      const isPasswordValid = await this.hashingProvider.compare(
+        signInDto[UserField.PASSWORD],
+        user?.[UserField.PASSWORD] ?? '',
+      );
+
+      const userId =
+        user._id instanceof Types.ObjectId
+          ? user._id.toString()
+          : String(user._id);
+
+      if (!isPasswordValid) {
+        await this.accountLockoutProvider.incrementFailedAttempts(userId);
+
+        throw new UnauthorizedException(
+          responseMessage.auth.invalidCredentials,
+        );
+      }
+
+      if (!user[UserField.IS_ACTIVE]) {
+        throw new AccountNotActiveException();
+      }
+
+      if (!user[UserField.IS_USER_VERIFIED]) {
+        throw new UserNotVerifiedException();
+      }
+
+      await this.accountLockoutProvider.resetFailedAttempts(userId);
+
+      return await UserResponseHelper.generateUserResponseWithTokens(
+        user,
+        this.authTokensProvider,
+      );
     } catch (error) {
-      throw new RequestTimeoutException(error);
+      ErrorHandlerHelper.handleError(
+        error,
+        this.logger,
+        responseMessage.auth.signInError,
+      );
     }
   }
 }

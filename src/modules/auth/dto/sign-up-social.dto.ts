@@ -1,38 +1,26 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { UserField } from '../../../common/enum';
+import { SignUpDto } from './sign-up.dto';
 
-export class SignUpDtoWithSocial {
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(2)
-  @MaxLength(50)
-  firstName: string;
+export class SignUpDtoWithSocial extends (SignUpDto as new () => Omit<
+  SignUpDto,
+  'password'
+>) {
+  @ApiProperty({
+    description: 'User is user verified',
+    example: true,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  [UserField.IS_USER_VERIFIED]?: boolean;
 
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(2)
-  @MaxLength(50)
-  lastName: string;
-
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
+  @ApiProperty({
+    description: 'User image',
+    example: 'https://example.com/avatar.jpg',
+  })
   @IsString()
   @IsOptional()
-  image?: string;
-
-  @IsString()
-  @IsOptional()
-  googleId?: string;
-
-  @IsString()
-  @IsOptional()
-  githubId?: string;
+  [UserField.IMAGE]?: string;
 }

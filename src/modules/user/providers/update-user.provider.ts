@@ -1,21 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UpdateUserDto } from '../dto/update-user-social.dto';
-import { UpdateUserSocialDto } from '../dto/update-user.dto';
-import { UserEntity } from '../user.entity';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { ErrorHandlerHelper } from '../../../common/helper';
+import { UserResponseHelper } from '../../../common/helper/user-response.helper';
+import responseMessage from '../../../common/messages/response.message';
+import { UpdateUserDto, UpdateUserSocialIdDto } from '../dto';
+import { User, UserDocument } from '../user.schema';
 
 @Injectable()
 export class UpdateUserProvider {
+  private readonly logger = new Logger(UpdateUserProvider.name);
+
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
   async updateUser(
-    id: number,
-    updateUserDto: UpdateUserDto | UpdateUserSocialDto,
+    id: string,
+    updateUserDto: UpdateUserDto | UpdateUserSocialIdDto,
   ) {
-    return await this.userRepository.update(id, updateUserDto);
+    try {
+      const user = await this.userModel
+        .findByIdAndUpdate(id, updateUserDto, { new: true })
+        .exec();
+      if (!user) {
+        throw new NotFoundException(responseMessage.user.notFound);
+      }
+      return UserResponseHelper.generateUserResponse(user as UserDocument);
+    } catch (error) {
+      ErrorHandlerHelper.handleError(
+        error,
+        this.logger,
+        responseMessage.common.updateUserError,
+      );
+    }
   }
 }

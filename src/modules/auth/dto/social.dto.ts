@@ -1,12 +1,23 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { SocialType } from '../enum/social-type.enum';
+import { AuthField } from '../../../common/enum';
+import { SocialProviderEnum } from '../enum';
 
 export class SocialDto {
+  @ApiProperty({
+    description: 'Social authentication token from provider',
+    example: 'ya29.a0AfH6SMBx...',
+  })
   @IsString()
   @IsNotEmpty()
-  token: string;
+  [AuthField.TOKEN]: string;
 
+  @ApiProperty({
+    description: 'Social authentication provider type',
+    enum: SocialProviderEnum,
+    example: SocialProviderEnum.GOOGLE,
+  })
   @IsNotEmpty()
-  @IsEnum(SocialType)
-  type: SocialType;
+  @IsEnum(SocialProviderEnum)
+  [AuthField.SOCIAL_PROVIDER]: SocialProviderEnum;
 }

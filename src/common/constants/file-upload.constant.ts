@@ -1,0 +1,8 @@
+export const FILE_UPLOAD_CONSTANTS = {
+  MAX_FILE_SIZE_BYTES: 10 * 1024 * 1024,
+  MAX_FILE_SIZE_MB: 10,
+
+  BYTES_PER_KB: 1024,
+
+  DEFAULT_UPLOAD_FOLDER: 'uploads',
+} as const;

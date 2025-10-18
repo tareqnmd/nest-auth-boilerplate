@@ -1,26 +1,25 @@
 import * as Joi from 'joi';
-import { DbType } from 'src/common/enum/db-type.enum';
 
 export default Joi.object({
   PORT: Joi.number().required(),
-  NODE_ENV: Joi.string().required(),
+  NODE_ENV: Joi.string().valid('development', 'production').required(),
+  CLIENT_URL: Joi.string().required(),
 
-  DB_TYPE: Joi.string().valid(DbType.POSTGRES).required(),
-  DB_HOST: Joi.string().required(),
-  DB_PORT: Joi.number().required(),
-  DB_USERNAME: Joi.string().required(),
-  DB_PASSWORD: Joi.string().required(),
-  DB_NAME: Joi.string().required(),
-  DB_SYNCHRONIZE: Joi.boolean().required(),
-  DB_AUTO_LOAD_ENTITIES: Joi.boolean().required(),
+  MONGODB_URI: Joi.string().required(),
+  MONGODB_DB: Joi.string().required(),
 
   JWT_TOKEN_SECRET: Joi.string().required(),
-  JWT_ACCESS_TOKEN_TTL: Joi.string().required(),
-  JWT_REFRESH_TOKEN_TTL: Joi.string().required(),
+  JWT_ACCESS_TOKEN_TTL: Joi.number().required(),
+  USER_TOKEN_TTL: Joi.number().required(),
+  JWT_REFRESH_TOKEN_TTL: Joi.number().required(),
 
-  GOOGLE_CLIENT_ID: Joi.string().required(),
-  GOOGLE_CLIENT_SECRET: Joi.string().required(),
+  CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
 
-  GITHUB_CLIENT_ID: Joi.string().required(),
-  GITHUB_CLIENT_SECRET: Joi.string().required(),
+  MAIL_HOST: Joi.string().required(),
+  MAIL_PORT: Joi.number().required(),
+  MAIL_USER: Joi.string().required(),
+  MAIL_PASSWORD: Joi.string().required(),
+  MAIL_FROM: Joi.string().required(),
 });

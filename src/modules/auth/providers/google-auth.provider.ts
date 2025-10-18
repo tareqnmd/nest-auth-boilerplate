@@ -1,38 +1,28 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleInit,
-  UnauthorizedException,
-} from '@nestjs/common';
-import type { ConfigType } from '@nestjs/config';
-import { OAuth2Client } from 'google-auth-library';
-import socialConfig from 'src/config/social.config';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { GOOGLE_API_URL } from 'src/common/constants/other-links.constant';
+import { UserField } from '../../../common/enum';
+import responseMessage from '../../../common/messages/response.message';
+import { IGoogleUser } from '../interfaces/google-user.interface';
 import { ISocialResponse } from '../interfaces/social-response.interface';
 
 @Injectable()
-export class GoogleAuthProvider implements OnModuleInit {
-  private oAuthClient: OAuth2Client;
-  constructor(
-    @Inject(socialConfig.KEY)
-    private readonly socialConfiguration: ConfigType<typeof socialConfig>,
-  ) {}
-
-  onModuleInit() {
-    this.oAuthClient = new OAuth2Client(
-      this.socialConfiguration.googleClientId,
-      this.socialConfiguration.googleClientSecret,
-    );
-  }
+export class GoogleAuthProvider {
+  constructor() {}
 
   async authenticate(token: string) {
     try {
-      const ticket = await this.oAuthClient.verifyIdToken({
-        idToken: token,
-      });
-      const payload = ticket.getPayload();
-      return payload;
-    } catch {
-      throw new UnauthorizedException();
+      const response = await fetch(`${GOOGLE_API_URL}${token}`);
+      if (response.status !== 200) {
+        throw new UnauthorizedException(
+          responseMessage.auth.invalidGoogleToken,
+        );
+      }
+      return (await response.json()) as IGoogleUser;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException(responseMessage.auth.invalidGoogleToken);
     }
   }
 
@@ -40,17 +30,27 @@ export class GoogleAuthProvider implements OnModuleInit {
     try {
       const data = await this.authenticate(token);
       if (!data) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+          responseMessage.auth.failedToRetrieveGoogleData,
+        );
+      }
+      if (!data.email) {
+        throw new UnauthorizedException(
+          responseMessage.auth.emailNotProvidedByGoogle,
+        );
       }
       return {
-        firstName: data.given_name,
-        lastName: data.family_name,
-        email: data.email,
-        image: data.picture,
-        googleId: data.sub,
+        [UserField.FIRST_NAME]: data.givenName || '',
+        [UserField.LAST_NAME]: data.familyName || '',
+        [UserField.EMAIL]: data.email,
+        [UserField.IMAGE]: data.picture,
+        [UserField.GOOGLE_ID]: data.sub,
       } as ISocialResponse;
-    } catch {
-      throw new UnauthorizedException();
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException(responseMessage.auth.googleAuthFailed);
     }
   }
 }

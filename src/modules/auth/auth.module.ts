@@ -1,18 +1,25 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import jwtConfig from 'src/config/jwt.config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CommunicationModule } from '../communication/communication.module';
+import { HashingModule } from '../hashing/hashing.module';
+import { TokenModule } from '../token/token.module';
+import { User, UserSchema } from '../user/user.schema';
 import { UsersModule } from '../user/users.module';
 import { AuthController } from './auth.controller';
+import { GithubAuthProvider } from './providers';
+import { AccountLockoutProvider } from './providers/account-lockout.provider';
 import { AuthTokensProvider } from './providers/auth-tokens.provider';
 import { AuthService } from './providers/auth.service';
-import { BcryptProvider } from './providers/bcrypt.provider';
-import { GithubAuthProvider } from './providers/github-auth.provider';
+import { ForgotPasswordProvider } from './providers/forgot-password.provider';
 import { GoogleAuthProvider } from './providers/google-auth.provider';
-import { HashingProvider } from './providers/hashing.provider';
+import { RefreshTokenProvider } from './providers/refresh-token.provider';
+import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { SignInProvider } from './providers/sign-in.provider';
 import { SignUpProvider } from './providers/sign-up.provider';
 import { SocialProvider } from './providers/social.provider';
+import { UnlockAccountProvider } from './providers/unlock-account.provider';
+import { VerifyUserProvider } from './providers/verify-user.provider';
 
 @Module({
   controllers: [AuthController],
@@ -21,18 +28,23 @@ import { SocialProvider } from './providers/social.provider';
     SignInProvider,
     SignUpProvider,
     SocialProvider,
-    {
-      provide: HashingProvider,
-      useClass: BcryptProvider,
-    },
     AuthTokensProvider,
     GoogleAuthProvider,
     GithubAuthProvider,
+    RefreshTokenProvider,
+    ResetPasswordProvider,
+    VerifyUserProvider,
+    ForgotPasswordProvider,
+    AccountLockoutProvider,
+    UnlockAccountProvider,
   ],
   imports: [
     UsersModule,
-    ConfigModule.forFeature(jwtConfig),
-    JwtModule.registerAsync(jwtConfig.asProvider()),
+    JwtModule,
+    HashingModule,
+    TokenModule,
+    CommunicationModule,
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
 })
 export class AuthModule {}

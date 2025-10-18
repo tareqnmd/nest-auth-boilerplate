@@ -1,9 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { REQUEST_USER_KEY } from 'src/common/constants';
+import { REQUEST_USER_KEY } from '../../../common/constants';
 import {
   ITokenUser,
   RequestWithUser,
-} from 'src/common/interfaces/user.interface';
+} from '../../../common/interfaces/user.interface';
 
 export const Token = createParamDecorator(
   (field: keyof ITokenUser, ctx: ExecutionContext) => {

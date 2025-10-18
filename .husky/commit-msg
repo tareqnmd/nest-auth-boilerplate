@@ -1,0 +1,46 @@
+#!/bin/sh
+
+commit_msg=$(cat "$1")
+
+if [ -z "$commit_msg" ]; then
+  echo "❌ Error: Commit message cannot be empty"
+  exit 1
+fi
+
+if [ ${#commit_msg} -lt 10 ]; then
+  echo "❌ Error: Commit message is too short (minimum 10 characters)"
+  echo "Your message: '$commit_msg'"
+  exit 1
+fi
+    
+if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{1,}"; then
+  echo "⚠️  Warning: Commit message doesn't follow conventional commits format"
+  echo ""
+  echo "Expected format: type(scope): subject"
+  echo ""
+  echo "Types:"
+  echo "  feat:     A new feature"
+  echo "  fix:      A bug fix"
+  echo "  docs:     Documentation changes"
+  echo "  style:    Code style changes (formatting, etc.)"
+  echo "  refactor: Code refactoring"
+  echo "  perf:     Performance improvements"
+  echo "  test:     Adding or updating tests"
+  echo "  build:    Build system changes"
+  echo "  ci:       CI/CD changes"
+  echo "  chore:    Other changes (dependencies, etc.)"
+  echo "  revert:   Revert a previous commit"
+  echo ""
+  echo "Examples:"
+  echo "  feat(auth): add Google OAuth login"
+  echo "  fix(user): resolve profile update bug"
+  echo "  docs: update README with setup instructions"
+  echo ""
+  echo "Your message: '$commit_msg'"
+  echo ""
+  echo "To bypass this check, use: git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ Commit message is valid"
+exit 0

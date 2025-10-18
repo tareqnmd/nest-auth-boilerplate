@@ -2,18 +2,26 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { DbType } from './common/enum/db-type.enum';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { LoggerModule } from 'nestjs-pino';
+import { RATE_LIMIT_CONSTANTS } from './common/constants';
+import { LoggingInterceptor } from './common/interceptors';
 import appConfig from './config/app.config';
+import cloudinaryConfig from './config/cloudinary.config';
 import dbConfig from './config/db.config';
 import envValidation from './config/env.validation';
 import jwtConfig from './config/jwt.config';
-import socialConfig from './config/social.config';
+import { loggerConfig } from './config/logger.config';
+import mailConfig from './config/mail.config';
+import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
 import { TokenGuard } from './modules/auth/guards/token.guard';
+import { CommunicationModule } from './modules/communication/communication.module';
+import { ConfigurationModule } from './modules/configuration/configuration.module';
+import { HealthModule } from './modules/health/health.module';
+import { TokenModule } from './modules/token/token.module';
+import { UploadModule } from './modules/upload/upload.module';
 import { UsersModule } from './modules/user/users.module';
 
 @Module({
@@ -21,37 +29,40 @@ import { UsersModule } from './modules/user/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, dbConfig, jwtConfig, socialConfig],
+      load: [appConfig, dbConfig, jwtConfig, cloudinaryConfig, mailConfig],
       validationSchema: envValidation,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+    LoggerModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: configService.get<DbType>('dbConfig.type'),
-        host: configService.get<string>('dbConfig.host'),
-        port: configService.get<number>('dbConfig.port'),
-        username: configService.get<string>('dbConfig.username'),
-        password: configService.get<string>('dbConfig.password'),
-        database: configService.get<string>('dbConfig.name'),
-        synchronize: configService.get<boolean>('dbConfig.synchronize'),
-        autoLoadEntities: configService.get<boolean>(
-          'dbConfig.autoLoadEntities',
-        ),
-      }),
+      useFactory: loggerConfig,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: RATE_LIMIT_CONSTANTS.TTL,
+        limit: RATE_LIMIT_CONSTANTS.LIMIT,
+      },
+    ]),
+    DatabaseModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     AuthModule,
     UsersModule,
+    TokenModule,
+    CommunicationModule,
+    HealthModule,
+    UploadModule,
+    ConfigurationModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
+    LoggingInterceptor,
     TokenGuard,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
